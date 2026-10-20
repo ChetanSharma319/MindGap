@@ -14,6 +14,22 @@ from core import auth, config, db, judge, llm  # noqa: E402
 
 app = FastAPI(title="MindGap API")
 
+
+class _ApiPrefix:
+    """Hosts may strip the /api prefix before the request reaches us. Put it back so every route still matches."""
+
+    def __init__(self, inner):
+        self.inner = inner
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope["path"] != "/" and not scope["path"].startswith("/api"):
+            path = "/api" + scope["path"]
+            scope = {**scope, "path": path, "raw_path": path.encode()}
+        await self.inner(scope, receive, send)
+
+
+app.add_middleware(_ApiPrefix)
+
 MAX_FAILED_LOGINS = 5
 LOCK_MINUTES = 15
 
@@ -130,6 +146,11 @@ def _finish(session_id: str, outcome: str) -> dict:
 
 
 # ---------- endpoints ----------
+
+@app.get("/")
+def home():
+    return {"app": "MindGap API", "health": "/api/health"}
+
 
 @app.get("/api/health")
 def health():
