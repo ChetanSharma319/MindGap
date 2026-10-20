@@ -61,8 +61,11 @@ def api(method: str, path: str, payload: dict | None = None):
     try:
         r = requests.request(method, f"{BACKEND_URL}{path}", json=payload,
                              headers={"x-frontend-token": FRONTEND_TOKEN}, timeout=90)
-    except requests.RequestException:
+    except requests.RequestException as e:
+        print(f"[api] {method} {BACKEND_URL}{path} -> no response: {type(e).__name__}", flush=True)
         raise ApiError("We couldn't reach the server. Check your connection and try again.", "error")
+    if r.status_code >= 400:
+        print(f"[api] {method} {BACKEND_URL}{path} -> {r.status_code}: {r.text[:200]}", flush=True)
     if r.status_code >= 500:
         raise ApiError("Something went wrong on our side. Your text is still here, so try again.", "error")
     if r.status_code >= 400:
@@ -379,10 +382,10 @@ def fetch_history(user: dict | None) -> list:
 def load_concepts():
     try:
         items = api("GET", "/api/concepts")
-    except ApiError:
-        return gr.update()
+    except ApiError as e:
+        return gr.update(), notice_html(f"Concepts couldn't load: {e}", "error")
     TITLES.update({c["id"]: c["title"] for c in items})
-    return gr.update(choices=[(c["title"], c["id"]) for c in items], value=None)
+    return gr.update(choices=[(c["title"], c["id"]) for c in items], value=None), ""
 
 
 def enter(user: dict) -> list:
@@ -391,11 +394,13 @@ def enter(user: dict) -> list:
             history_html(rows, user), ""]
 
 
+# outputs: concept, notice, user, login_view, app_view, nav, hero, history, login_notice
 def on_load(user):
-    concepts = load_concepts()
+    concepts, problem = load_concepts()
     if user:
-        return [concepts, *enter(user)]
-    return [concepts, None, gr.update(visible=True), gr.update(visible=False), nav_user(None), "", "", ""]
+        return [concepts, problem, *enter(user)]
+    return [concepts, problem, None, gr.update(visible=True), gr.update(visible=False), nav_user(None), "", "",
+            problem]
 
 
 # outputs: user, login_view, app_view, nav, hero, history, login_notice
@@ -949,7 +954,7 @@ with gr.Blocks(title="MindGap", **({} if GRADIO_6 else STYLE)) as demo:
     instant = {"show_progress": "hidden", "queue": False, "trigger_mode": "always_last"}
     pending = gr.State("")
 
-    demo.load(on_load, user, [concept, *entry_out], **quiet)
+    demo.load(on_load, user, [concept, notice, *entry_out], **quiet)
     in_handle.change(gate_signin, [in_handle, in_pin], signin_btn, **instant)
     in_pin.change(gate_signin, [in_handle, in_pin], signin_btn, **instant)
     for comp in (new_handle, new_pin, reg_consent):
@@ -987,4 +992,7 @@ with gr.Blocks(title="MindGap", **({} if GRADIO_6 else STYLE)) as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(allowed_paths=[os.path.join(HERE, "assets")], favicon_path=LOGO_PATH, **(STYLE if GRADIO_6 else {}))
+    # Hosts like Render give a PORT and need the app on 0.0.0.0. Locally this stays 127.0.0.1:7860.
+    port = os.environ.get("PORT")
+    demo.launch(server_name="0.0.0.0" if port else None, server_port=int(port) if port else None,
+                allowed_paths=[os.path.join(HERE, "assets")], favicon_path=LOGO_PATH, **(STYLE if GRADIO_6 else {}))

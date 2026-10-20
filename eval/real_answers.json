@@ -25,7 +25,8 @@
     "answer": "When the chatbot keeps the chat in a variable, the entire chat is gone when the page is refreshed, this is because the chat was never stored in something like a file, database or some other memory type. So as to access the chats anytime from anywhere we need to store it under a storage solution maybe file or database depending on the situation whether it is stored on the client side or at the server side. And hence on doing so the chat can be access anytime and will never disappear even if the browser is refreshed"
   },
   {
-    "who": "C2", "case_id": "forget_1", "hand_verdict": "PASS",
+    "who": "C2", "case_id": "forget_1", "hand_verdict": "FAIL",
+    "note": "Scored PASS in Move 1 against the original key. Must-hit h2 was tightened after testing to 'the variable lived in the page memory'; this answer says 'stateless' and never says where the chat lived.",
     "answer": "javascript variables are stateless, so variable will be empty after refresshing unless it stores inthe cookie"
   },
   {
