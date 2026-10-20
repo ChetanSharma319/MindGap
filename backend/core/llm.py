@@ -52,7 +52,11 @@ EVIDENCE_SYSTEM = """You check a learner's answer against a fixed answer key. Yo
 
 For each must_hit point: present = true only if the answer itself states that point, including HOW it happens, not just the conclusion.
 A vague phrase such as "it is not safe", "for security reasons" or "a fraudster can misuse it" does not state how.
-For each must_not claim: present = true only if the answer makes that claim.
+If a point names a mechanism (where something lives, who can see it, what wipes it), the answer must name that same mechanism.
+Repeating the outcome ("it is gone", "it is lost") or using jargon alone ("it is stateless") does not count as the mechanism.
+When in doubt, mark the point as not present.
+For each must_not claim: present = true if the answer makes that claim, even in different words or with extra detail
+(for example "it isn't saved in any storage" makes the claim "it was never stored anywhere").
 For every item marked present, copy the EXACT words from the answer that show it (one short continuous span, character for character).
 If an item is not present, its quote is "".
 
@@ -78,7 +82,9 @@ def _chat_json(system: str, package: dict) -> dict:
         },
         timeout=60,
     )
-    response.raise_for_status()
+    if response.status_code >= 400:
+        # Show the provider's own reason (e.g. "model not found"). It never contains the key.
+        raise RuntimeError(f"LLM error {response.status_code} for model '{config.LLM_MODEL}': {response.text[:300]}")
     return json.loads(response.json()["choices"][0]["message"]["content"])
 
 
