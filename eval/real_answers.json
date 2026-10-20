@@ -1,0 +1,35 @@
+[
+  {
+    "who": "C1", "case_id": "key_1", "hand_verdict": "PASS",
+    "answer": "So, I can use that app for getting the weather information, right? So, if I am able to get the weather information through that app, I also have the rights where I can sort of get all the details of that app, like I can go on to the inspect tab and then I can also find what all the app is basically serving, right? So, through that inspect tag, if the API key is present on to the front-end, so I can take that API key, paid weather app API key and I can use it for my own need, right? I can also design a particular different weather app and then I can use that API key in my own app so that the bill that does not came of the request do not come on my end and it comes on your end."
+  },
+  {
+    "who": "C2", "case_id": "key_1", "hand_verdict": "FAIL",
+    "answer": "there's high probability that apikey may get expire due to the security reasons, applicatin owner requires to renew the apikey"
+  },
+  {
+    "who": "C1", "case_id": "key_2", "hand_verdict": "FAIL",
+    "answer": "Yeah, that is the main option, right? We need to store the API key on to the server side so that only the users know the keys only page."
+  },
+  {
+    "who": "C2", "case_id": "key_2", "hand_verdict": "FAIL",
+    "answer": "not safe either, a logged user can also be a fraudster"
+  },
+  {
+    "who": "C1", "case_id": "key_3", "hand_verdict": "FAIL",
+    "note": "Scored PASS in Move 1 against the original key. The must-not 'the app can fetch the key from the server' was added after this session, and this answer makes that claim.",
+    "answer": "Nope it's not safe! Team puts API key inside their app code mean that the key is still present in the code and anyone who can access the code can access the key as well and can perform tasks i defined earlier under your name (key's owner). The best practice is to store the key at a server with specific identity or a name and whenever the key is needed the app makes the request to the server to access the key and server verifies the key, hence there is no way through which anyone other than you can access your key and malfunction with it"
+  },
+  {
+    "who": "C1", "case_id": "forget_1", "hand_verdict": "FAIL",
+    "answer": "When the chatbot keeps the chat in a variable, the entire chat is gone when the page is refreshed, this is because the chat was never stored in something like a file, database or some other memory type. So as to access the chats anytime from anywhere we need to store it under a storage solution maybe file or database depending on the situation whether it is stored on the client side or at the server side. And hence on doing so the chat can be access anytime and will never disappear even if the browser is refreshed"
+  },
+  {
+    "who": "C2", "case_id": "forget_1", "hand_verdict": "PASS",
+    "answer": "javascript variables are stateless, so variable will be empty after refresshing unless it stores inthe cookie"
+  },
+  {
+    "who": "C1", "case_id": "forget_2", "hand_verdict": "FAIL",
+    "answer": "When the server restarts all the signup data is gone as the signup list is not store in a particular storage solution or memory like file, database etc. I would store all the signup data in the database and not in variable so that the data stays as it is and i can access it at any time from anywhere as it is on server side"
+  }
+]
